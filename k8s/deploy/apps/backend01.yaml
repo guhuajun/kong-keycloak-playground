@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend01
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend01
+  template:
+    metadata:
+      labels:
+        app: backend01
+    spec:
+      containers:
+        - name: backend01
+          image: 192.168.0.31:5000/k3d/backend01:0.0.1
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8081
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8081
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend01
+spec:
+  selector:
+    app: backend01
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend01
+spec:
+  minReplicas: 1
+  maxReplicas: 3
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend01
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50      
+# ---
+# apiVersion: networking.k8s.io/v1beta1
+# kind: Ingress
+# metadata:
+#   name: backend01
+#   namespace: default
+#   annotations:
+#     traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+#     traefik.ingress.kubernetes.io/router.tls: "true"
+# spec:
+#   rules:
+#     - host: backend01.api.k3d.contoso.com
+#       http:
+#         paths:
+#           - backend:
+#               serviceName: backend01
+#               servicePort: 8081
+#             path: /
+#   tls:
+#     - secretName: api-wildcard-cert

@@ -1,0 +1,21 @@
+# https://doc.traefik.io/traefik/providers/kubernetes-ingress/#ingressclass
+
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kong
+  namespace: kong
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: "*.api.k3d.contoso.com"
+      http:
+        paths:
+          - backend:
+              serviceName: kong-kong-porxy
+              servicePort: 8000
+            path: /
+  tls:
+    - secretName: api-wildcard-cert

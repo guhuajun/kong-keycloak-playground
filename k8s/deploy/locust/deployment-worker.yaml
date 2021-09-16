@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: locust-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: locust-worker
+  template:
+    metadata:
+      labels:
+        app: locust-worker
+    spec:    
+      containers:
+      - name: locust-worker
+        image: 192.168.0.31:5000/k3d/kong-locust:0.0.1
+        imagePullPolicy: Always
+        command: 
+          - locust
+          - --host
+          - https://backend01.api.k3d.contoso.com
+          - --worker
+          - --master-host
+          - locust-master
+        livenessProbe:
+          exec:
+            command:
+              - python
+              - --version
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 10
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 600m
+            memory: 1024Mi
+        env:
+          - name: LOCUST_WAIT_TIME
+            value: "0.2"
+          - name: KEYCLOAK_LOCUST_CLIENT_SECRET_KEY
+            value: "360e445b-7e09-44c0-8184-5d788f076f5f"
+        ports:
+        - containerPort: 8089
+          name: http
+          protocol: TCP
+      hostAliases:
+        - ip: "192.168.0.31"
+          hostnames:
+            - "backend01.api.k3d.contoso.com"
+            - "keycloak.apps.k3d.contoso.com"
+
+

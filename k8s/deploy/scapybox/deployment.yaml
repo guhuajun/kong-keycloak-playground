@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scapybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scapybox
+  template:
+    metadata:
+      labels:
+        app: scapybox
+    spec:
+      containers:
+      - name: scapybox
+        image: 192.168.0.31:5000/k3d/scapybox:0.0.1
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8888
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 10
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: 600m
+            memory: 1024Mi
+        env:
+          - name: LOCUST_WAIT_TIME
+            value: "0.2"
+        ports:
+        - containerPort: 8888
+          name: http
+          protocol: TCP
+      hostAliases:
+        - ip: "192.168.0.31"
+          hostnames:
+            - "backend01.api.k3d.contoso.com"
+            - "keycloak.apps.k3d.contoso.com"
+

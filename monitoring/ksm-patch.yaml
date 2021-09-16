@@ -1,0 +1,6 @@
+spec:
+  template:
+    spec:
+      containers:
+        - name: kube-state-metrics
+          image: '192.168.0.31:5000/bitnami/kube-state-metrics:1.9.8'

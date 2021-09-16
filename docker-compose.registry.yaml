@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  registry:
+    image: registry:2
+    hostname: registry
+    ports:
+      - 5000:5000
+    networks:
+      registry:
+    volumes:
+      - registry:/var/lib/registry
+    restart: always
+
+  ui:
+    image: joxit/docker-registry-ui:2.0
+    ports:
+      - 5001:5001
+    environment:
+      - REGISTRY_TITLE=192.168.0.31
+      - REGISTRY_URL=http://localhost:5000
+      - SINGLE_REGISTRY=true
+    depends_on:
+      - registry
+
+networks:
+  registry:
+
+volumes:
+  registry:

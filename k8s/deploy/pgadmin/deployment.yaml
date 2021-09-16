@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:    
+      containers:
+      - name: pgadmin
+        image: 192.168.0.31:5000/k3d/pgadmin4:5
+        env:
+          - name: PGADMIN_DEFAULT_EMAIL 
+            value: admin@contoso.com
+          - name: PGADMIN_DEFAULT_PASSWORD
+            value: admin
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          timeoutSeconds: 1
+          periodSeconds: 10
+          failureThreshold: 3
+        resources:
+          requests:
+            cpu: 100m
+            memory: 512Mi
+          limits:
+            cpu: 200m
+            memory: 1024Mi
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+
+
+

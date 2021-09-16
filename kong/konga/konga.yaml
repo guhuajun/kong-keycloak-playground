@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: konga
+  namespace: kong
+  annotations:
+    traefik.http.routers.konga.rule: Host(`konga.apps.k3d.contoso.com`)
+  labels:
+    io.kompose.service: konga
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: konga
+  template:
+    metadata:
+      labels:
+        app: konga
+    spec:
+      containers:
+        - env:
+            - name: KONGA_SEED_KONG_NODE_DATA_SOURCE_FILE
+              value: /opt/konga/kong_node.data
+            - name: NODE_ENV
+              value: development
+            - name: NO_AUTH
+              value: "true"
+            - name: TOKEN_SECRET
+              value: kong
+          image: 192.168.0.31:5000/k3d/konga:0.14.9
+          name: konga
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 600m
+              memory: 512Mi
+          ports:
+            - containerPort: 1337
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: konga-configmap-volume
+              mountPath: /opt/konga/kong_node.data
+              subPath: kong_node.data
+      volumes:
+        - name: konga-configmap-volume
+          configMap:
+            name: konga-configmap
+            items:
+              - key: kong_node.data
+                path: kong_node.data

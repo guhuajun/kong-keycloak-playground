@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  kong:
+    image: greggu/kong-oidc:0.0.1
+    build:
+      context: ./kong/
+      dockerfile: Dockerfile

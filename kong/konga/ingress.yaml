@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: konga
+  namespace: kong
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: konga.tools.k3d.contoso.com
+      http:
+        paths:
+          - backend:
+              serviceName: konga
+              servicePort: 1337
+            path: /
+  tls:
+    - secretName: tools-wildcard-cert

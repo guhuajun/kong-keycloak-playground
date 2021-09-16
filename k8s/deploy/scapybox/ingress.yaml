@@ -1,0 +1,20 @@
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: scapybox
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: scapybox.tools.k3d.contoso.com
+      http:
+        paths:
+          - backend:
+              serviceName: scapybox
+              servicePort: 8888
+            path: /
+  tls:
+    - secretName: tools-wildcard-cert

@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  appv1:
+    image: 192.168.0.31:5000/k3d/shop:v1
+    build:
+      context: ./v1
+      dockerfile: Dockerfile
+  appv2:
+    image: 192.168.0.31:5000/k3d/shop:v2
+    build:
+      context: ./v2
+      dockerfile: Dockerfile

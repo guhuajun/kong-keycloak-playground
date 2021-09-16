@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-configmap
+data:
+  kong.yml: |
+    _format_version: "2.1"
+    _transform: true
+
+    services:
+      - name: backend01
+        url: http://backend01.default:8081
+        port: 8081
+        protocol: http
+        tags:
+          - backend01
+        routes:
+          - name: backend01
+            paths:
+              - /
+        plugins:
+          - name: oidc
+            config:
+              client_id: "kong"
+              client_secret: "904664c2-caf3-447b-8d89-d6aa1f4ca2d7"
+              bearer_only: "yes"
+              realm: "api.k3d.contoso.com"
+              introspection_endpoint: "https://keycloak.apps.k3d.contoso.com/auth/realms/api.k3d.contoso.com/protocol/openid-connect/token/introspect"
+              discovery: "https://keycloak.apps.k3d.contoso.com/auth/realms/api.k3d.contoso.com/.well-known/openid-configuration"
+          - name: cors
+            config:
+              origins:
+                - https://frontend.apps.k3d.contoso.com/*
+              methods:
+                - GET
+                - POST
+                - OPTIONS
+                - HEAD
+              headers:
+                - Authorization
+                - Accept
+                - Accept-Version
+                - Content-Length
+                - Content-MD5
+                - Content-Type
+                - Date
+                - Access-Control-Allow-Origin
+              exposed_headers:
+                - Authorization
+              credentials: true
+              max_age: 3600
+
+      - name: backend02
+        url: http://backend02.default:8081
+        port: 8081
+        protocol: http
+        tags:
+          - backend02
+        routes:
+          - name: backend02
+            paths:
+              - /
+        plugins:
+        - name: acl
+          config: 
+            allow:
+            - postman
+            hide_groups_header: true
+        - name: key-auth
+          route: backend02
+          config: 
+            key_names:
+              - api-key
+
+    acls:
+      - consumer: postman
+        group: postman
+
+    consumers:
+      - username: postman
+        custom_id: 53069ff7-16fc-4f40-82e9-7745396a32ed
+
+    keyauth_credentials:
+      - consumer: postman
+        key: 44055c05-6f34-40c3-a7d4-2313094d93b4
+
+    routes:
+      # with oidc authentication
+      - name: backend01
+        service: backend01
+        hosts: ["backend01.api.k3d.contoso.com"]
+      # with key-auth
+      - name: backend02
+        service: backend02
+        hosts: ["backend02.api.k3d.contoso.com"]

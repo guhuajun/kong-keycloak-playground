@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: konga-configmap
+data:
+  kong_node.data: |
+    module.exports = [
+        {
+            "name": "Kong",
+            "type": "key_auth",
+            "kong_admin_url": "http://kong-kong-admin:8001",
+            "kong_api_key": "DonKeyKong",
+            "health_checks": false,
+        }
+    ]
+

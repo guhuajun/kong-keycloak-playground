@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend02
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend02
+  template:
+    metadata:
+      labels:
+        app: backend02
+    spec:
+      containers:
+        - name: backend02
+          image: 192.168.0.31:5000/k3d/backend02:0.0.1
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8081
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8081
+            initialDelaySeconds: 30
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          ports:
+            - containerPort: 8000
+              name: http
+              protocol: TCP
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: backend02
+spec:
+  selector:
+    app: backend02
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 8081
+      targetPort: 8081
+# ---
+# apiVersion: networking.k8s.io/v1beta1
+# kind: Ingress
+# metadata:
+#   name: backend02
+#   namespace: default
+#   annotations:
+#     traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+#     traefik.ingress.kubernetes.io/router.tls: "true"
+# spec:
+#   rules:
+#     - host: backend02.api.k3d.contoso.com
+#       http:
+#         paths:
+#           - backend:
+#               serviceName: backend02
+#               servicePort: 8081
+#             path: /
+#   tls:
+#     - secretName: api-wildcard-cert

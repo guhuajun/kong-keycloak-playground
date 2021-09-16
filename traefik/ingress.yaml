@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: traefik
+  namespace: default
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web, websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  rules:
+    - host: traefikui.tools.k3d.contoso.com
+      http:
+        paths:
+          - backend:
+              serviceName: traefik
+              servicePort: 9000
+            path: /
+  tls:
+    - secretName: tools-wildcard-cert

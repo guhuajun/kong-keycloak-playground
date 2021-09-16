@@ -1,0 +1,8 @@
+version: "3"
+
+services:
+  keycloak-init:
+    image: 192.168.0.31:5000/k3d/keycloak-init:0.0.1
+    build:
+      context: ./keycloak/
+      dockerfile: Dockerfile

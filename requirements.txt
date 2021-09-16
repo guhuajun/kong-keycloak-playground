@@ -1,0 +1,11 @@
+starlette
+uvicorn
+
+django
+django-extensions
+django-rest-framework
+
+djangorestframework-simplejwt
+
+names
+python-keycloak

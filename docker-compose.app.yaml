@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  backend01-v1:
+    image: 192.168.0.31:5000/k3d/backend01:0.0.1
+    build:
+      context: ./apps/backend01/v1
+      dockerfile: Dockerfile
+
+  backend01-v2:
+    image: 192.168.0.31:5000/k3d/backend01:0.0.2
+    build:
+      context: ./apps/backend01/v2
+      dockerfile: Dockerfile
+
+  backend02:
+    image: 192.168.0.31:5000/k3d/backend02:0.0.1
+    build:
+      context: ./apps/backend02/
+      dockerfile: Dockerfile
+
+  frontend:
+    image: 192.168.0.31:5000/k3d/frontend:0.0.1
+    build:
+      context: ./apps/frontend/
+      dockerfile: Dockerfile
+
+  locust:
+    image: 192.168.0.31:5000/k3d/kong-locust:0.0.1
+    build:
+      context: ./apps/locust/
+      dockerfile: Dockerfile
+
+  scapybox:
+    image: 192.168.0.31:5000/k3d/scapybox:0.0.1
+    build:
+      context: ./apps/scapybox/
+      dockerfile: Dockerfile
