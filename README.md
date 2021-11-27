@@ -4,7 +4,7 @@
 
 Please feel free to start a discussion for this demo porject. I can help you to understanding this demo. But for a serious setup in production environment, please do ask an expert from Kong and keycloak community.
 
-I am using a Dell T3431 (4x Xeon CPU and 64GB memory) workstation as the host machine, but it depends on the number of components that you will use.
+I am using a Dell T3431 (4x Xeon CPU and 64GB memory) workstation as the host machine, but you can use a different setup, it depends on the number of components that you will use.
 
 ## Steps
 
