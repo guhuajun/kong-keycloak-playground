@@ -44,23 +44,15 @@ curl https://raw.githubusercontent.com/kubernetes/dashboard/v2.1.0/aio/deploy/re
 
 ### Certificates
 
-Using EasyPKI to generate cetificates. I am using Contoso in this demo, please feel free to guess my background.
+Using EasyPKI to generate cetificates. I am using Contoso in this demo, please feel free to guess my background. :)
 
 ```bash
 rm -rf /root/ca
 
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --filename root --ca "rootca"
-
-
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name root --filename intermediate --intermediate "intca"
-
-
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name intermediate --dns "*.apps.k3d.contoso.com" "*.apps.k3d.contoso.com"
-
-
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name intermediate --dns "*.api.k3d.contoso.com" "*.api.k3d.contoso.com"
-
-
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name intermediate --dns "*.tools.k3d.contoso.com" "*.tools.k3d.contoso.com"
 ```
 
