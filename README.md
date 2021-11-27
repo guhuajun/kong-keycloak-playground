@@ -94,11 +94,9 @@ kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | gre
 ### Creates Certificates in K8S default namespace
 
 ```bash
-kubectl create secret tls apps-wildcard-cert --namespace default --key certs/wildcard.apps.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.apps.k3d.contoso.com.crt
-
-kubectl create secret tls api-wildcard-cert --namespace default --key certs/wildcard.api.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.api.k3d.contoso.com.crt
-
-kubectl create secret tls tools-wildcard-cert --namespace default --key certs/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
+kubectl create secret tls apps-wildcard-cert --namespace default --key certs/wildcard.apps.k3d.contoso.com.key --cert certs/wildcard.apps.k3d.contoso.com.crt
+kubectl create secret tls api-wildcard-cert --namespace default --key certs/wildcard.api.k3d.contoso.com.key --cert certs/wildcard.api.k3d.contoso.com.crt
+kubectl create secret tls tools-wildcard-cert --namespace default --key certs/wildcard.tools.k3d.contoso.com.key --cert certs/wildcard.tools.k3d.contoso.com.crt
 ```
 
 Create a bundle file
