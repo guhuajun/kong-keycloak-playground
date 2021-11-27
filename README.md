@@ -1,12 +1,20 @@
-# k3d-playground
+# Kong Keycloak Playground
+
+## Introduction
+
+Please feel free to start a discussion for this demo porject. I can help you to understanding this demo. But for a serious setup in production environment, please do ask an expert from Kong and keycloak community.
+
+I am using a Dell T3431 (4x Xeon CPU and 64GB memory) workstation as the host machine, but it depends on the number of components that you will use.
 
 ## Steps
 
-### Before you start
+###  Before you start
 
-Prepare a linux server with Docker installed.
+Prepare a linux server with Docker installed, like running CentOS in Virulabox.
 
 ### Start a local docker registry
+
+Start a local docker registry to 
 
 ```bash
 docker-compose -f docker-compose.registry.yaml up -d
@@ -36,21 +44,31 @@ curl https://raw.githubusercontent.com/kubernetes/dashboard/v2.1.0/aio/deploy/re
 
 ### Certificates
 
-Using EasyPKI to generate cetificates
+Using EasyPKI to generate cetificates. I am using Contoso in this demo, please feel free to guess my background.
 
 ```bash
 rm -rf /root/ca
 
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --filename root --ca "rootca"
+
+
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name root --filename intermediate --intermediate "intca"
+
+
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name intermediate --dns "*.apps.k3d.contoso.com" "*.apps.k3d.contoso.com"
+
+
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name intermediate --dns "*.api.k3d.contoso.com" "*.api.k3d.contoso.com"
+
+
 docker run -t --rm -e PKI_ROOT="/opt/ca" -e PKI_ORGANIZATION="Contoso" -e PKI_ORGANIZATIONAL_UNIT="ITO" -e PKI_COUNTRY="US" -e PKI_PROVINCE="WA" -e PKI_LOCALITY="Redmond" -v /root/ca:/opt/ca creatdevsolutions/easypki:v1.0.1 create --ca-name intermediate --dns "*.tools.k3d.contoso.com" "*.tools.k3d.contoso.com"
 ```
 
-Then install root ca cert and intermediate ca cert into your browser.
+Then install root ca cert and intermediate ca cert into your browser. It's Firefox for me.
 
 ### Cluster
+
+Create a K3D cluster without Traefik. You may adjust the agents number and other parameters.
 
 ```bash
 k3d cluster create devbox --agents 4 \
@@ -60,6 +78,8 @@ k3d cluster create devbox --agents 4 \
 
 ### Traefik
 
+Deploy Traefik 2.0
+
 ```bash
 helm repo add traefik https://containous.github.io/traefik-helm-chart
 cd charts
@@ -68,37 +88,28 @@ kubectl apply -f traefik/ingress.yaml
 helm install traefik charts/traefik -f traefik/values.yaml
 ```
 
-<!-- ### Traefik Mesh
+### Kubernetes Dashboard
 
-```bash
-helm repo add traefik-mesh https://helm.traefik.io/mesh
-helm repo update
-cd charts
-helm fetch traefik-mesh/traefik-mesh --untar
-docker pull traefik/mesh:v1.4.0
-docker tag traefik/mesh:v1.4.0 192.168.0.31:5000/traefik/mesh:v1.4.0
-docker push 192.168.0.31:5000/traefik/mesh:v1.4.0
-helm install traefik-mesh charts/traefik-mesh -f traefik-mesh/values.yaml
-``` -->
-
-### Dashboard
+Deploy Kubernetes Dashboard with SSL protection.
 
 ```bash
 kubectl apply -f k8s/dashboard/
 kubectl apply -f k8s/dashboard/roles/
-kubectl create secret tls tools-wildcard-cert --namespace kubernetes-dashboard --key /root/ca/intermediate/keys/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
+kubectl create secret tls tools-wildcard-cert --namespace kubernetes-dashboard --key certs/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
 kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
 ```
 
-### Creates Certificates in K8S
+### Creates Certificates in K8S default namespace
 
 ```bash
-kubectl create secret tls apps-wildcard-cert --namespace default --key /root/ca/intermediate/keys/wildcard.apps.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.apps.k3d.contoso.com.crt
-kubectl create secret tls api-wildcard-cert --namespace default --key /root/ca/intermediate/keys/wildcard.api.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.api.k3d.contoso.com.crt
-kubectl create secret tls tools-wildcard-cert --namespace default --key /root/ca/intermediate/keys/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
+kubectl create secret tls apps-wildcard-cert --namespace default --key certs/wildcard.apps.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.apps.k3d.contoso.com.crt
+
+kubectl create secret tls api-wildcard-cert --namespace default --key certs/wildcard.api.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.api.k3d.contoso.com.crt
+
+kubectl create secret tls tools-wildcard-cert --namespace default --key certs/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
 ```
 
-Generate bundle file
+Create a bundle file
 
 ```bash
 cat certs/intermediate.crt certs/root.crt > certs/bundle.pem
@@ -108,7 +119,7 @@ cat certs/intermediate.crt certs/root.crt > certs/bundle.pem
 
 ```bash
 kubectl apply -f monitoring/namespace.yaml
-kubectl create secret tls tools-wildcard-cert --namespace monitoring --key /root/ca/intermediate/keys/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
+kubectl create secret tls tools-wildcard-cert --namespace monitoring --key certs/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
 ```
 
 ```bash
@@ -120,7 +131,7 @@ helm install -n monitoring prometheues charts/kube-prometheus-stack -f monitorin
 helm upgrade -n monitoring prometheues charts/kube-prometheus-stack -f monitoring/values.yaml
 ```
 
-Change the registry of kube-state-metrics
+Change the registry of kube-state-metrics.
 
 ```bash
 kubectl -n=monitoring patch deployment/prometheues-kube-state-metrics --patch "$(cat monitoring/ksm-patch.yaml)"
@@ -159,8 +170,8 @@ update values.yaml
 
 ```bash
 kubectl apply -f kong/namespace.yaml
-kubectl create secret tls api-wildcard-cert --namespace kong --key /root/ca/intermediate/keys/wildcard.api.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.api.k3d.contoso.com.crt
-kubectl create secret tls tools-wildcard-cert --namespace kong --key /root/ca/intermediate/keys/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
+kubectl create secret tls api-wildcard-cert --namespace kong --key certs/wildcard.api.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.api.k3d.contoso.com.crt
+kubectl create secret tls tools-wildcard-cert --namespace kong --key certs/wildcard.tools.k3d.contoso.com.key --cert /root/ca/intermediate/certs/wildcard.tools.k3d.contoso.com.crt
 kubectl -n kong apply -f kong/kong-configmap.yaml
 helm install -n kong kong charts/kong -f kong/values.yaml
 kubectl -n kong apply -f kong/konga/
@@ -210,7 +221,7 @@ k3d cluster delete devbox
 
 ## References
 
-[creating a local development kubernetes cluster with k3s and traefik proxy](https://codeburst.io/creating-a-local-development-kubernetes-cluster-with-k3s-and-traefik-proxy-7a5033cb1c2d)  
+[Creating a local development kubernetes cluster with k3s and traefik proxy](https://codeburst.io/creating-a-local-development-kubernetes-cluster-with-k3s-and-traefik-proxy-7a5033cb1c2d)  
 [traefik](https://github.com/stevegroom/traefikGateway/blob/master/traefik/docker-compose.yaml)  
 [Prometheus](https://github.com/prometheus-community/helm-charts)  
 [Keycloak Example](https://github.com/vchrisb/tanzu-ui/blob/29df772a9be89f2b6d11e966e18cc5527c1d555e/kubernetes/keycloak/README.md)  
@@ -218,5 +229,4 @@ k3d cluster delete devbox
 [ID Tokens](https://docs.microsoft.com/en-us/azure/active-directory/develop/id-tokens) 
 [Active Directory Claims Mapping](https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-claims-mapping)  
 [Azure AD](https://stackoverflow.com/questions/62593370/how-to-set-up-azure-active-directory-to-return-tenant-id-and-other-attributes-to)  
-
-[Token formats and ownership, accessTokenAcceptedVersion](https://docs.microsoft.com/zh-cn/azure/active-directory/develop/access-tokens#token-formats-and-ownership)  
+[Token formats and ownership, accessTokenAcceptedVersion](https://docs.microsoft.com/zh-cn/azure/active-directory/develop/access-tokens#token-formats-and-ownership)
