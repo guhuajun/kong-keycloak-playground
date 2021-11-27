@@ -199,9 +199,9 @@ locust --host https://backend01.api.k3d.contoso.com --headless -u 20 -r 2 -t 10s
 
 ### Keycloak Intialization
 
-Open Keycloak web page, add realm by using relam/realm-export.json file.
-create apiadmin user and assign manage-users role in Keycloak Realm (Users -> Role Mappings -> Client Roles -> realm-management)
-run python new_users.py
+Open Keycloak web page, add realm by using relam/realm-export.json file. 
+create apiadmin user and assign manage-users role in Keycloak Realm (Users -> Role Mappings -> Client Roles -> realm-management) 
+run python new_users.py 
 
 ### Clean-ups
 
